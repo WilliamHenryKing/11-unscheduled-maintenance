@@ -97,13 +97,14 @@ export class Stage {
       e.preventDefault();
       this.handleClick(e, -1);
     });
-    renderer.setAnimationLoop(this.frame);
   }
 
   resize(width: number, height: number, insets: Insets) {
     this.renderer.setSize(width, height, false);
     this.field.uniforms.uPixel.value = this.renderer.getPixelRatio();
     this.rig.resize(width, height, insets);
+    // Start drawing only once the canvas has its real size, so the first frame is a true one.
+    if (this.frames === 0) this.renderer.setAnimationLoop(this.frame);
   }
 
   showLevel(level: Level, states: States, trace: Trace, instant: boolean) {

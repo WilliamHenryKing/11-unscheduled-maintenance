@@ -6,17 +6,24 @@
     <title>UNSCHEDULED MAINTENANCE</title>
     <meta name="description" content="Repair a telescope's optical path and discover impossible constellations" />
     <style>
-      /* Arrival veil: shown until worldReady() in src/loader.ts lifts it. Restyle to the art direction. */
-      #arrival { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; align-content: center; gap: 18px; background: #0d0f14; color: #f2efe6; font: 600 13px/1.2 system-ui, sans-serif; letter-spacing: 0.2em; text-transform: uppercase; transition: opacity 0.6s ease, visibility 0.6s; }
+      /* Arrival veil: an eyepiece reticle over the dark dome, lifted by worldReady() in src/loader.ts. */
+      #arrival { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; align-content: center; gap: 22px; background: radial-gradient(ellipse at 50% 40%, #0c1220 0%, #04060b 70%); color: #e9e6dc; font: 500 11px/1.2 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: 0.28em; text-transform: uppercase; transition: opacity 0.7s ease, visibility 0.7s; }
       #arrival.is-done { opacity: 0; visibility: hidden; }
-      #arrival .bar { width: 140px; height: 2px; background: #ffffff22; overflow: hidden; }
-      #arrival .bar i { display: block; height: 100%; width: 40%; background: currentColor; animation: arrival-slide 1.2s ease-in-out infinite; }
+      #arrival .reticle { position: relative; width: 96px; height: 96px; border: 1px solid #8fb4ff55; border-radius: 50%; }
+      #arrival .reticle::before, #arrival .reticle::after { content: ""; position: absolute; background: #8fb4ff44; }
+      #arrival .reticle::before { left: 50%; top: 8px; bottom: 8px; width: 1px; }
+      #arrival .reticle::after { top: 50%; left: 8px; right: 8px; height: 1px; }
+      #arrival .reticle i { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: #ffd6a0; box-shadow: 0 0 12px 3px #ffd6a088; animation: arrival-drift 2.4s ease-in-out infinite; }
+      #arrival .bar { width: 120px; height: 1px; background: #ffffff1a; overflow: hidden; }
+      #arrival .bar i { display: block; height: 100%; width: 40%; background: #c9a36a; animation: arrival-slide 1.4s ease-in-out infinite; }
+      #arrival small { color: #8f99ab; font-size: 10px; letter-spacing: 0.24em; }
       @keyframes arrival-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
-      @media (prefers-reduced-motion: reduce) { #arrival .bar i { animation: none; width: 100%; } }
+      @keyframes arrival-drift { 0%, 100% { transform: translate(-14px, 9px); } 50% { transform: translate(0, 0); } }
+      @media (prefers-reduced-motion: reduce) { #arrival .bar i { animation: none; width: 100%; } #arrival .reticle i { animation: none; } }
     </style>
   </head>
   <body>
-    <div id="arrival" role="status" aria-live="polite"><span>UNSCHEDULED MAINTENANCE</span><div class="bar"><i></i></div></div>
+    <div id="arrival" role="status" aria-live="polite"><div class="reticle" aria-hidden="true"><i></i></div><span>Unscheduled maintenance</span><div class="bar" aria-hidden="true"><i></i></div><small>Aligning optics</small></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
