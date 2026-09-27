@@ -95,8 +95,8 @@ export const families: Recipes["families"] = [
   { id: "mirror-cell", count: 12, voxel: 0.0025, keep: 0.3, hero: true, build: mirrorCell },
   { id: "spider-vane", count: 10, voxel: 0.002, keep: 0.3, build: spider },
   { id: "focuser", count: 12, voxel: 0.0012, keep: 0.3, build: focuser },
-  { id: "eyepiece", count: 16, voxel: 0.0008, keep: 0.3, build: eyepiece },
-  { id: "mount-part", count: 18, voxel: 0.002, keep: 0.3, build: mountPart },
+  { id: "eyepiece", count: 32, voxel: 0.0008, keep: 0.3, build: eyepiece },
+  { id: "mount-part", count: 36, voxel: 0.002, keep: 0.3, build: mountPart },
 ];
 export const textures: Recipes["textures"] = [
   { id: "anodised-blue", ramp: [0x121a26, 0x1f2a3a, 0x2a3a4f], layers: [{ kind: "fibres", scale: 128, stretch: 24 }, { kind: "fbm", scale: 8, weight: 0.2 }], roughness: [0.25, 0.4], normal: 0.3 },
