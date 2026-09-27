@@ -93,7 +93,7 @@ export function EndingCard({
 
 export function HintCard({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[11.5rem] flex justify-center p-4 md:bottom-10">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[11.5rem] flex justify-center p-4 md:bottom-6 md:left-6 md:justify-start md:p-0">
       <section
         aria-label="How to repair"
         className="panel card-in pointer-events-auto max-w-sm rounded-xl p-4 text-sm"

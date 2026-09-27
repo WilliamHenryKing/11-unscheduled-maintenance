@@ -14,7 +14,7 @@ export function slitDirection(elevation: number): THREE.Vector3 {
 }
 
 function dome(): THREE.Mesh {
-  const geo = new THREE.SphereGeometry(DOME_RADIUS, 96, 48, 0, Math.PI * 2, 0, Math.PI / 2);
+  const geo = new THREE.SphereGeometry(DOME_RADIUS, 96, 52, 0, Math.PI * 2, 0, Math.PI / 2 + 0.12);
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     uniforms: {
@@ -35,7 +35,7 @@ function dome(): THREE.Mesh {
       varying vec3 vPos;
       void main() {
         float edge = abs(vPos.x) - uSlit;
-        if (edge < 0.0 && vPos.z < 6.0) discard;
+        if (edge < 0.0 && vPos.z < 6.0 && vPos.y > 0.0) discard;
         float az = atan(vPos.z, vPos.x) / 6.28318 * 32.0;
         float rib = smoothstep(0.93, 1.0, abs(fract(az) * 2.0 - 1.0));
         float el = asin(clamp(vPos.y / ${DOME_RADIUS.toFixed(1)}, 0.0, 1.0)) / 1.5708 * 7.0;
@@ -44,7 +44,7 @@ function dome(): THREE.Mesh {
         float nearSlit = exp(-max(edge, 0.0) * 0.55) * step(vPos.z, 6.0);
         col += uRim * nearSlit * 0.05;
         col += uRim * smoothstep(0.35, 0.0, max(edge, 0.0)) * 0.35 * step(vPos.z, 6.0);
-        col *= 0.55 + 0.45 * (vPos.y / ${DOME_RADIUS.toFixed(1)});
+        col *= 0.5 + 0.5 * clamp(vPos.y / ${DOME_RADIUS.toFixed(1)}, 0.0, 1.0);
         gl_FragColor = vec4(col, 1.0);
         #include <colorspace_fragment>
       }`,
@@ -55,7 +55,7 @@ function dome(): THREE.Mesh {
 function floor(): THREE.Mesh {
   const mesh = new THREE.Mesh(
     new THREE.CircleGeometry(DOME_RADIUS, 64),
-    new THREE.MeshStandardMaterial({ color: 0x0a0d13, metalness: 0.2, roughness: 0.85 }),
+    new THREE.MeshStandardMaterial({ color: 0x05070b, metalness: 0.1, roughness: 0.9 }),
   );
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.y = -2.45;

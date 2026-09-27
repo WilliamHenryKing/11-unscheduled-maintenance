@@ -33,7 +33,7 @@ export class Stage {
   private focusId: string | null = null;
   private hoverId: string | null = null;
   private raycaster = new THREE.Raycaster();
-  private clock = new THREE.Clock();
+  private timer = new THREE.Timer();
   private frames = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -46,18 +46,18 @@ export class Stage {
     renderer.toneMapping = THREE.AgXToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer = renderer;
 
     const scene = this.scene;
     scene.background = new THREE.Color(PALETTE.night);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 0.22;
+    scene.environmentIntensity = 0.16;
     pmrem.dispose();
 
     // Key: moonlight falling through the slit. Fill: a dim hemisphere.
-    const key = new THREE.DirectionalLight(PALETTE.moon, 2.4);
+    const key = new THREE.DirectionalLight(PALETTE.moon, 3);
     key.position.set(-3, 12, -7);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -70,7 +70,7 @@ export class Stage {
     sc.bottom = -6;
     sc.near = 1;
     sc.far = 30;
-    scene.add(key, new THREE.HemisphereLight(0x3a4a6a, 0x07080c, 0.9));
+    scene.add(key, new THREE.HemisphereLight(0x2c3a58, 0x050609, 0.5));
 
     // Pooled warm lights for lit receivers and warning lights for misalignments.
     for (let i = 0; i < 4; i++) {
@@ -223,7 +223,8 @@ export class Stage {
   }
 
   private frame = () => {
-    const time = this.clock.getElapsedTime();
+    this.timer.update();
+    const time = this.timer.getElapsed();
     const still = this.still;
     this.field.uniforms.uTime.value = time;
     this.field.uniforms.uTwinkle.value = still ? 0 : 1;

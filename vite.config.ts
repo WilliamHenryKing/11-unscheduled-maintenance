@@ -6,5 +6,6 @@ export default defineConfig({
   plugins: [react(), tailwind()],
   server: { host: "127.0.0.1", port: 4521, strictPort: true },
   preview: { host: "127.0.0.1", port: 4621, strictPort: true },
-  build: { cssMinify: "lightningcss" },
+  // three.js alone is ~700 kB minified; one chunk is fine for a single-scene game.
+  build: { cssMinify: "lightningcss", chunkSizeWarningLimit: 1200 },
 });

@@ -33,6 +33,7 @@ export function buildBench(level: Level): THREE.Group {
   const plate = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, d), plateMat);
   plate.position.y = -0.11;
   plate.receiveShadow = true;
+  plate.castShadow = true;
   group.add(plate);
 
   const lip = new THREE.Mesh(new THREE.BoxGeometry(w + 0.12, 0.08, d + 0.12), edgeMat);
