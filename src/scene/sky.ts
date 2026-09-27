@@ -59,7 +59,6 @@ function floor(): THREE.Mesh {
   );
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.y = -2.45;
-  mesh.receiveShadow = true;
   return mesh;
 }
 

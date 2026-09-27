@@ -213,7 +213,7 @@ export class Stage {
     await this.rig.lookUp(c.elevation, false, this.still);
     await this.figures.reveal(index, this.still);
     if (final) {
-      await this.rig.lookUp(50, true, this.still, 3.2);
+      await this.rig.lookUp(56, true, this.still, 3.2);
       this.figures.answer(blinks, this.still);
     }
   }
