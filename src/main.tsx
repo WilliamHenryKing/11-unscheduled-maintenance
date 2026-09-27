@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { unlockOnGesture } from "./audio/sound";
 import { worldReady } from "./loader";
 import { Stage } from "./scene/stage";
 import { App } from "./ui/App";
@@ -13,4 +14,5 @@ if (root) {
   const stage = new Stage(canvas);
   stage.onFirstFrame = () => requestAnimationFrame(() => worldReady());
   createRoot(root).render(<App stage={stage} />);
+  unlockOnGesture();
 }

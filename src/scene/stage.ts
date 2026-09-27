@@ -6,7 +6,7 @@ import type { Level, States, Trace } from "../game/types";
 import { BeamLayer } from "./beams";
 import { buildBench, disposeGroup, toWorld } from "./bench";
 import { CameraRig, type Insets } from "./camera";
-import { ConstellationLayer } from "./constellations";
+import { ConstellationLayer, type SkyCue } from "./constellations";
 import { BEAM_Y, PALETTE } from "./palette";
 import { angleFor, buildPiece, type PieceView, setLit } from "./pieces";
 import { buildSky, type StarField } from "./sky";
@@ -17,6 +17,7 @@ export class Stage {
   onPick: (id: string, step: 1 | -1) => void = () => {};
   onHover: (id: string | null) => void = () => {};
   onFirstFrame: () => void = () => {};
+  onCue: (cue: SkyCue, i: number) => void = () => {};
   still = false;
 
   private renderer: THREE.WebGLRenderer;
@@ -210,6 +211,8 @@ export class Stage {
     if (!c) return;
     const final = index === CONSTELLATIONS.length - 1;
     this.setHover(null);
+    this.figures.onCue = (cue, i) => this.onCue(cue, i);
+    this.onCue("tilt", index);
     await this.rig.lookUp(c.elevation, false, this.still);
     await this.figures.reveal(index, this.still);
     if (final) {

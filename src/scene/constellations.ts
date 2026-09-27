@@ -59,8 +59,12 @@ function build(c: Constellation): Figure {
   return { group, stars, lines, lengths };
 }
 
+export type SkyCue = "tilt" | "star" | "answer" | "discovery";
+
 export class ConstellationLayer {
   readonly group = new THREE.Group();
+  /** Timing hooks for sound; `i` counts stars or blinks. */
+  onCue: (cue: SkyCue, i: number) => void = () => {};
   private figures: Figure[] = CONSTELLATIONS.map(build);
   private answering: THREE.Sprite | null = null;
   private tl: gsap.core.Timeline | null = null;
@@ -87,11 +91,13 @@ export class ConstellationLayer {
     };
     if (instant) {
       done();
+      this.onCue("star", 0);
       return Promise.resolve();
     }
     return new Promise((resolve) => {
       const tl = gsap.timeline({ onComplete: resolve });
       f.stars.forEach((s, i) => {
+        tl.call(() => this.onCue("star", i), [], 0.12 * i);
         tl.to(s.material, { opacity: 1, duration: 0.5 }, 0.12 * i);
         tl.to(s.scale, { x: s.userData.size, y: s.userData.size, duration: 0.6 }, 0.12 * i);
       });
@@ -115,10 +121,15 @@ export class ConstellationLayer {
     if (!star) return;
     this.answering = star;
     star.material.color.setHex(PALETTE.beam);
-    if (instant) return;
+    this.onCue("discovery", 0);
+    if (instant) {
+      this.onCue("answer", 0);
+      return;
+    }
     const big = star.userData.size * 2.4;
-    const tl = gsap.timeline({ delay: 0.4 });
+    const tl = gsap.timeline({ delay: 1.2 });
     for (let i = 0; i < blinks; i++) {
+      tl.call(() => this.onCue("answer", i));
       tl.to(star.scale, { x: big, y: big, duration: 0.14, ease: "power2.out" });
       tl.to(star.scale, { x: star.userData.size, y: star.userData.size, duration: 0.3 });
     }

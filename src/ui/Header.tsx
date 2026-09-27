@@ -17,7 +17,7 @@ export const Header = forwardRef<HTMLElement, Props>(function Header(
   return (
     <header
       ref={ref}
-      className={`pointer-events-none fixed inset-x-0 top-0 px-4 pt-[max(0.9rem,env(safe-area-inset-top))] md:inset-x-auto md:left-6 md:top-6 md:max-w-md md:p-0 ${
+      className={`pointer-events-none fixed inset-x-0 top-0 px-4 pr-16 pt-[max(0.9rem,env(safe-area-inset-top))] md:inset-x-auto md:left-6 md:top-6 md:max-w-md md:p-0 ${
         hidden ? "invisible" : ""
       }`}
     >

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { sound } from "../audio/sound";
 import { CONSTELLATIONS } from "../game/constellations";
 import { adjustable, LEVELS } from "../game/levels";
 import { trace } from "../game/optics";
@@ -8,6 +9,8 @@ import { Adjusters } from "./Adjusters";
 import { EndingCard, HintCard, RevealCard, TitleCard } from "./Cards";
 import { Header } from "./Header";
 import { useHintSeen, useKeys, useReducedMotion, useStageLayout } from "./hooks";
+import { MuteToggle } from "./MuteToggle";
+import { useBeamCues, useSkyCues } from "./sound";
 
 export function App({ stage }: { stage: Stage }) {
   const [game, dispatch] = useReducer(
@@ -31,10 +34,27 @@ export function App({ stage }: { stage: Stage }) {
     (id: string, step: 1 | -1) => {
       setFocusId(id);
       markHintSeen();
+      const part = parts.find((p) => p.id === id);
+      if (playing && part) {
+        const rate = 0.94 + Math.random() * 0.12;
+        sound.play(part.kind === "mirror" ? "turnMirror" : "turnTube", { rate });
+      }
       dispatch({ type: "turn", id, step });
     },
-    [markHintSeen],
+    [markHintSeen, parts, playing],
   );
+  const reset = () => {
+    if (playing) sound.play("reset");
+    dispatch({ type: "reset" });
+  };
+  /** Card buttons: a soft click, then the step. */
+  const press = (action: Action) => {
+    sound.play("ui");
+    dispatch(action);
+  };
+
+  useBeamCues(level.index, traced);
+  useSkyCues(stage);
 
   useEffect(() => {
     stage.still = reduced;
@@ -83,7 +103,7 @@ export function App({ stage }: { stage: Stage }) {
     focusId,
     setFocusId,
     turn: turnPart,
-    reset: () => dispatch({ type: "reset" }),
+    reset,
   });
 
   const constellation = CONSTELLATIONS[game.level];
@@ -108,25 +128,33 @@ export function App({ stage }: { stage: Stage }) {
           disabled={!playing}
           onFocus={setFocusId}
           onTurn={turnPart}
-          onReset={() => dispatch({ type: "reset" })}
+          onReset={reset}
         />
       </div>
-      {game.phase === "title" && <TitleCard onStart={() => dispatch({ type: "start" })} />}
-      {playing && !hintSeen && <HintCard onDismiss={markHintSeen} />}
+      {game.phase === "title" && <TitleCard onStart={() => press({ type: "start" })} />}
+      {playing && !hintSeen && (
+        <HintCard
+          onDismiss={() => {
+            sound.play("ui");
+            markHintSeen();
+          }}
+        />
+      )}
       {game.phase === "solved" && revealed && constellation && (
         <RevealCard
           constellation={constellation}
           final={final}
-          onNext={() => dispatch({ type: "next" })}
+          onNext={() => press({ type: "next" })}
         />
       )}
       {game.phase === "ending" && (
         <EndingCard
           repairs={LEVELS.length}
           turns={game.totalTurns}
-          onReplay={() => dispatch({ type: "start" })}
+          onReplay={() => press({ type: "start" })}
         />
       )}
+      <MuteToggle />
     </>
   );
 }
