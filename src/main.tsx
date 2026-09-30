@@ -9,10 +9,19 @@ const root = document.getElementById("root");
 if (root) {
   const canvas = document.createElement("canvas");
   canvas.className = "stage";
+  canvas.tabIndex = 0;
   canvas.setAttribute("aria-label", "Optical bench of the telescope");
   root.before(canvas);
   const stage = new Stage(canvas);
   stage.onFirstFrame = () => requestAnimationFrame(() => worldReady());
-  createRoot(root).render(<App stage={stage} />);
+  const app = createRoot(root);
+  app.render(<App stage={stage} />);
   unlockOnGesture();
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+      app.unmount();
+      stage.dispose();
+      canvas.remove();
+    });
+  }
 }

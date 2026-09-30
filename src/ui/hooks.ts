@@ -1,6 +1,15 @@
-import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import type { Piece } from "../game/types";
 import type { Stage } from "../scene/stage";
+import { keyCommand } from "./keyboard";
+
+/** After an opening or result card closes, put keyboard play back on a visible control. */
+export function focusPlayControl(onlyIfUnfocused = false) {
+  window.requestAnimationFrame(() => {
+    if (onlyIfUnfocused && document.activeElement !== document.body) return;
+    document.querySelector<HTMLButtonElement>(".part-select:not(:disabled)")?.focus();
+  });
+}
 
 export function useReducedMotion(): boolean {
   const query = "(prefers-reduced-motion: reduce)";
@@ -12,28 +21,6 @@ export function useReducedMotion(): boolean {
     return () => mq.removeEventListener("change", on);
   }, []);
   return reduced;
-}
-
-const HINT_KEY = "unscheduled-maintenance:hint-seen";
-
-/** The first-time hint shows until the first turn or dismissal; remembered per browser when possible. */
-export function useHintSeen(): [boolean, () => void] {
-  const [seen, setSeen] = useState(() => {
-    try {
-      return window.localStorage.getItem(HINT_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
-  const mark = useCallback(() => {
-    setSeen(true);
-    try {
-      window.localStorage.setItem(HINT_KEY, "1");
-    } catch {
-      // Storage unavailable: the hint simply returns next visit.
-    }
-  }, []);
-  return [seen, mark];
 }
 
 /** Keep the renderer sized to the window and the bench framed in the space the HUD leaves. */
@@ -52,6 +39,9 @@ export function useStageLayout(
       const top = head ? head.bottom + 8 : 0;
       const bottom = !wide && side ? h - side.top + 8 : 16;
       const right = wide && side ? w - side.left + 8 : 0;
+      const root = document.documentElement;
+      root.style.setProperty("--maintenance-hud-bottom", `${top}px`);
+      root.style.setProperty("--maintenance-panel-top", `${side ? side.top - 8 : h - 16}px`);
       stage.resize(w, h, { top: wide ? Math.min(top, h * 0.22) : top, bottom, right });
     };
     layout();
@@ -62,6 +52,8 @@ export function useStageLayout(
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", layout);
+      document.documentElement.style.removeProperty("--maintenance-hud-bottom");
+      document.documentElement.style.removeProperty("--maintenance-panel-top");
     };
   }, [stage, header, panel]);
 }
@@ -82,21 +74,29 @@ export function useKeys(opts: KeyOptions) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const { enabled, parts, focusId, setFocusId, turn, reset } = ref.current;
-      if (!enabled || e.metaKey || e.ctrlKey || e.altKey || parts.length === 0) return;
-      const index = parts.findIndex((p) => p.id === focusId);
-      const current = parts[index] ?? parts[0];
-      const key = e.key.toLowerCase();
-      const pick = (i: number) => {
-        const p = parts[(i + parts.length) % parts.length];
-        if (p) setFocusId(p.id);
-      };
-      if (/^[1-9]$/.test(key)) pick(Number(key) - 1);
-      else if (key === "arrowright" || key === "arrowdown") pick(index + 1);
-      else if (key === "arrowleft" || key === "arrowup") pick(index < 0 ? -1 : index - 1);
-      else if (key === "q" && current) turn(current.id, 1);
-      else if (key === "e" && current) turn(current.id, -1);
-      else if (key === "r") reset();
-      else return;
+      if (!enabled || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
+          target.closest(".log-header"))
+      )
+        return;
+      const command = keyCommand(
+        e.key,
+        parts.map((p) => p.id),
+        focusId,
+      );
+      if (!command) return;
+      if (command.type === "select") {
+        setFocusId(command.id);
+        const row = Array.from(
+          document.querySelectorAll<HTMLElement>(".adjuster-list [data-part-id]"),
+        ).find((item) => item.dataset.partId === command.id);
+        row?.querySelector<HTMLButtonElement>(".part-select:not(:disabled)")?.focus();
+      } else if (command.type === "turn") turn(command.id, command.step);
+      else reset();
       e.preventDefault();
     };
     window.addEventListener("keydown", onKey);

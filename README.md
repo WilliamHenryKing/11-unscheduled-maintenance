@@ -51,6 +51,7 @@ Three.js for the observatory, optical bench, beams, dome and star field (all geo
 
 - **Beam tracing as rules:** mirrors, apertures, splitters and receivers are modelled in pure TypeScript and traced each turn; the scene only draws what the tracer returns.
 - **Constellations as data:** each repair unlocks an authored star pattern drawn over a procedural sky.
+- **A guided night:** a camera tour of the optical bench leads into an optional, action-led guide. Select a part without turning it, restore the beam, then follow the repair into the sky. Keyboard, touch and reduced-motion routes share the same six puzzles.
 
 ## Run it locally
 
@@ -59,6 +60,7 @@ bun install --frozen-lockfile
 bun run dev      # http://127.0.0.1:4521/
 bun run check    # tsc, Biome, bun test, production build into dist/
 bun run preview  # http://127.0.0.1:4621/
+bun run e2e      # all six repairs, replay and two small touch layouts
 ```
 
 `src/game/` holds the beam trace, levels, reducer and solver (tested in `tests/`), `src/scene/` the three.js scene, `src/ui/` the React HUD.

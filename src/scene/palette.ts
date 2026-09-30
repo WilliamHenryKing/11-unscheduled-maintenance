@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { shared } from "./resources";
 
 // Dark observatory, anodised instrument metal, brass adjusters, one warm beam, cool starlight.
 export const PALETTE = {
@@ -40,7 +41,7 @@ export function glowTexture(): THREE.Texture {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
   }
-  glow = new THREE.CanvasTexture(canvas);
+  glow = shared(new THREE.CanvasTexture(canvas));
   glow.colorSpace = THREE.SRGBColorSpace;
   return glow;
 }

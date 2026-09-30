@@ -2,13 +2,14 @@ import gsap from "gsap";
 import * as THREE from "three";
 import { ANSWERING_STAR, CONSTELLATIONS, type Constellation } from "../game/constellations";
 import { glowMaterial, PALETTE } from "./palette";
+import { shared } from "./resources";
 import { slitDirection } from "./sky";
 
 // Star figures beyond the slit. Hidden until their repair is done, then drawn star by star.
 
 export const FIGURE_DISTANCE = 150;
 
-const LINE_GEO = new THREE.PlaneGeometry(1, 1).translate(0.5, 0, 0);
+const LINE_GEO = shared(new THREE.PlaneGeometry(1, 1).translate(0.5, 0, 0));
 
 interface Figure {
   group: THREE.Group;
@@ -68,6 +69,9 @@ export class ConstellationLayer {
   private figures: Figure[] = CONSTELLATIONS.map(build);
   private answering: THREE.Sprite | null = null;
   private tl: gsap.core.Timeline | null = null;
+  private settle: (() => void) | null = null;
+  private answerTl: gsap.core.Timeline | null = null;
+  private answerSettle: (() => void) | null = null;
 
   constructor() {
     for (const f of this.figures) this.group.add(f.group);
@@ -77,8 +81,8 @@ export class ConstellationLayer {
   reveal(index: number, instant: boolean): Promise<void> {
     const f = this.figures[index];
     if (!f) return Promise.resolve();
+    this.cancel();
     f.group.visible = true;
-    this.tl?.progress(1);
     const done = () => {
       f.stars.forEach((s) => {
         s.scale.setScalar(s.userData.size);
@@ -95,7 +99,14 @@ export class ConstellationLayer {
       return Promise.resolve();
     }
     return new Promise((resolve) => {
-      const tl = gsap.timeline({ onComplete: resolve });
+      this.settle = resolve;
+      const tl = gsap.timeline({
+        onComplete: () => {
+          this.tl = null;
+          this.settle = null;
+          resolve();
+        },
+      });
       f.stars.forEach((s, i) => {
         tl.call(() => this.onCue("star", i), [], 0.12 * i);
         tl.to(s.material, { opacity: 1, duration: 0.5 }, 0.12 * i);
@@ -114,25 +125,54 @@ export class ConstellationLayer {
     });
   }
 
-  /** The finale's discovery: one star of The Instrument blinks back, once per repair turn. */
-  answer(blinks: number, instant: boolean) {
+  /** The finale's discovery: one star of The Instrument blinks back, once per repair. */
+  answer(blinks: number, instant: boolean): Promise<void> {
+    this.answerTl?.kill();
+    this.answerTl = null;
+    this.answerSettle?.();
+    this.answerSettle = null;
     const f = this.figures[this.figures.length - 1];
     const star = f?.stars[ANSWERING_STAR];
-    if (!star) return;
+    if (!star) return Promise.resolve();
     this.answering = star;
     star.material.color.setHex(PALETTE.beam);
     this.onCue("discovery", 0);
     if (instant) {
       this.onCue("answer", 0);
-      return;
+      return Promise.resolve();
     }
     const big = star.userData.size * 2.4;
-    const tl = gsap.timeline({ delay: 1.2 });
-    for (let i = 0; i < blinks; i++) {
-      tl.call(() => this.onCue("answer", i));
-      tl.to(star.scale, { x: big, y: big, duration: 0.14, ease: "power2.out" });
-      tl.to(star.scale, { x: star.userData.size, y: star.userData.size, duration: 0.3 });
-    }
+    return new Promise((resolve) => {
+      this.answerSettle = resolve;
+      const tl = gsap.timeline({
+        delay: 1.2,
+        onComplete: () => {
+          this.answerTl = null;
+          this.answerSettle = null;
+          resolve();
+        },
+      });
+      this.answerTl = tl;
+      for (let i = 0; i < blinks; i++) {
+        tl.call(() => this.onCue("answer", i));
+        tl.to(star.scale, { x: big, y: big, duration: 0.14, ease: "power2.out" });
+        tl.to(star.scale, { x: star.userData.size, y: star.userData.size, duration: 0.3 });
+      }
+    });
+  }
+
+  /** Stop queued drawing/blink callbacks and release any waiting reveal. */
+  cancel() {
+    this.tl?.kill();
+    this.tl = null;
+    this.answerTl?.kill();
+    this.answerTl = null;
+    const answerSettle = this.answerSettle;
+    this.answerSettle = null;
+    answerSettle?.();
+    const settle = this.settle;
+    this.settle = null;
+    settle?.();
   }
 
   tick(time: number, still: boolean) {
@@ -143,8 +183,7 @@ export class ConstellationLayer {
   }
 
   clear() {
-    this.tl?.kill();
-    this.tl = null;
+    this.cancel();
     this.answering = null;
     for (const f of this.figures) {
       gsap.killTweensOf(f.stars.map((s) => s.scale));

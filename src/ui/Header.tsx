@@ -15,14 +15,17 @@ export const Header = forwardRef<HTMLElement, Props>(function Header(
   ref,
 ) {
   return (
-    <header
+    <section
       ref={ref}
-      className={`pointer-events-none fixed inset-x-0 top-0 px-4 pr-16 pt-[max(0.9rem,env(safe-area-inset-top))] md:inset-x-auto md:left-6 md:top-6 md:max-w-md md:p-0 ${
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: this named scroll region needs keyboard access on short screens
+      tabIndex={0}
+      aria-labelledby="repair-heading"
+      className={`log-header pointer-events-none fixed inset-x-0 top-0 px-4 pr-16 pt-[max(0.9rem,env(safe-area-inset-top))] md:inset-x-auto md:left-6 md:top-6 md:max-w-md md:p-0 ${
         hidden ? "invisible" : ""
       }`}
     >
       <p className="eyebrow">Unscheduled maintenance · night log</p>
-      <h1 className="mt-1 text-lg font-semibold tracking-tight md:text-2xl">
+      <h1 id="repair-heading" className="mt-1 text-lg font-semibold tracking-tight md:text-2xl">
         <span className="mr-2 font-mono text-sm font-normal text-brass">
           {String(level.index + 1).padStart(2, "0")}/{String(total).padStart(2, "0")}
         </span>
@@ -35,6 +38,6 @@ export const Header = forwardRef<HTMLElement, Props>(function Header(
       >
         {trace.solved ? "Alignment nominal · all receivers lit" : beamSummary(trace)}
       </p>
-    </header>
+    </section>
   );
 });

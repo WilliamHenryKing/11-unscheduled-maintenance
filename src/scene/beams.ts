@@ -2,6 +2,7 @@ import * as THREE from "three";
 import type { Level, Mark, Trace } from "../game/types";
 import { toWorld } from "./bench";
 import { BEAM_Y, glowMaterial, PALETTE } from "./palette";
+import { shared } from "./resources";
 
 // The visible light path: a hot core, a soft halo, glints where it turns and marks where it fails.
 
@@ -24,6 +25,8 @@ const sprayMat = new THREE.MeshBasicMaterial({
   depthWrite: false,
   toneMapped: false,
 });
+shared(UNIT);
+for (const material of [coreMat, haloMat, sprayMat]) shared(material);
 
 const MARK_STYLE: Record<Mark["kind"], { color: number; size: number; opacity: number }> = {
   lit: { color: PALETTE.beam, size: 0.9, opacity: 1 },

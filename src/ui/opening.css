@@ -1,0 +1,210 @@
+.opening {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  overflow-y: auto;
+  padding: 7vw;
+  pointer-events: auto;
+  background: linear-gradient(90deg, #040810ed 0%, #08101bb5 34%, #08101b00 74%);
+  color: #f3ead9;
+}
+.opening-copy {
+  max-width: 720px;
+}
+.opening-eyebrow {
+  font: 500 10px / 1.6 var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #bdab89;
+}
+.opening h1 {
+  font:
+    400 clamp(46px, 5.5vw, 86px) / 1.02 Georgia,
+    serif;
+  letter-spacing: -0.045em;
+  margin: 24px 0;
+}
+.opening h1 em {
+  font-weight: 400;
+  color: #d7b17b;
+}
+.opening-premise {
+  font-size: clamp(16px, 1.5vw, 22px);
+  line-height: 1.7;
+  color: #dadbdf;
+  margin: 0 0 36px;
+}
+.opening-button {
+  min-height: 52px;
+  padding: 0 24px;
+  border: 1px solid #b89462;
+  border-radius: 3px;
+  background: #b98e5226;
+  color: #f1dec0;
+  font: 500 14px var(--font-mono);
+  cursor: pointer;
+}
+.opening-button span {
+  margin-left: 24px;
+}
+.opening-button:hover {
+  background: #b98e5240;
+}
+.enter-note {
+  display: block;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.05em;
+  margin-top: 14px;
+  color: #9ea7b7;
+}
+.opening-coordinate {
+  position: absolute;
+  bottom: 32px;
+  right: 36px;
+  font: 10px / 1.8 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-align: right;
+  color: #9ea7b7;
+}
+.rise {
+  animation: opening-rise 1s both;
+}
+.rise:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.rise:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.rise:nth-child(4) {
+  animation-delay: 0.45s;
+}
+@keyframes opening-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+.repair-guide {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: min(345px, calc(100vw - 48px));
+  z-index: 2;
+  pointer-events: auto;
+  padding: 17px 19px 9px;
+  border: 1px solid #8d79583f;
+  border-top: 2px solid #b9965b;
+  border-radius: 4px;
+  background: #0a111cef;
+}
+.repair-guide p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.repair-guide .opening-eyebrow {
+  font-size: 10px;
+}
+.guide-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #c9a36a;
+}
+.guide-foot button {
+  min-height: 36px;
+  padding-left: 10px;
+  text-decoration: underline;
+  color: #b6becb;
+  cursor: pointer;
+}
+.guide-replay {
+  pointer-events: auto;
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #8d795866;
+  background: #0a111ce8;
+  border-radius: 50%;
+  font:
+    16px Georgia,
+    serif;
+  cursor: pointer;
+}
+@media (max-width: 767px) {
+  .opening {
+    align-items: flex-start;
+    padding: max(65px, 10vh) 26px 30px;
+    background: linear-gradient(180deg, #040810f0 0%, #08101bbb 39%, #08101b00 79%);
+  }
+  .opening h1 {
+    font-size: clamp(37px, 10vw, 60px);
+    margin: 18px 0;
+  }
+  .opening-premise {
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 25px;
+  }
+  .opening-button {
+    min-height: 48px;
+    padding: 0 18px;
+  }
+  .opening-coordinate,
+  .enter-note {
+    display: none;
+  }
+  .repair-guide {
+    left: 12px;
+    top: var(--maintenance-hud-bottom, 155px);
+    bottom: auto;
+    width: calc(100vw - 24px);
+    padding: 11px 14px 4px;
+    max-height: min(
+      170px,
+      max(
+        0px,
+        calc(
+          var(--maintenance-panel-top, calc(100dvh - 150px)) -
+          var(--maintenance-hud-bottom, 155px) -
+          8px
+        )
+      )
+    );
+    overflow-y: auto;
+  }
+  .repair-guide p {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .guide-replay {
+    left: 12px;
+    bottom: 155px;
+  }
+}
+@media (max-height: 550px) {
+  .repair-guide[data-revealed="true"] {
+    display: none;
+  }
+  .opening {
+    align-items: flex-start;
+    padding: 28px 5vw;
+  }
+  .opening h1 {
+    font-size: 44px;
+    margin: 12px 0;
+  }
+  .opening-premise {
+    margin-bottom: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}

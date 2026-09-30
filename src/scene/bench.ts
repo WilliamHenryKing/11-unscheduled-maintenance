@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { Level } from "../game/types";
 import { PALETTE } from "./palette";
+import { disposeTree, shared } from "./resources";
 
 /** Grid cell (or fractional grid point) → world position on the bench top. */
 export function toWorld(level: Level, x: number, y: number, height = 0): THREE.Vector3 {
@@ -23,6 +24,7 @@ const lineMat = new THREE.LineBasicMaterial({
   opacity: 0.55,
 });
 const holeMat = new THREE.MeshBasicMaterial({ color: 0x07090d });
+for (const material of [plateMat, edgeMat, lineMat, holeMat]) shared(material);
 
 /** Optical breadboard: anodised plate, engraved cell grid, tapped holes, brass trim and pedestal. */
 export function buildBench(level: Level): THREE.Group {
@@ -75,7 +77,5 @@ export function buildBench(level: Level): THREE.Group {
 }
 
 export function disposeGroup(group: THREE.Object3D) {
-  group.traverse((obj) => {
-    if (obj instanceof THREE.Mesh || obj instanceof THREE.LineSegments) obj.geometry.dispose();
-  });
+  disposeTree(group);
 }

@@ -55,6 +55,46 @@ canvas.stage {
   color: var(--color-muted);
 }
 
+.maintenance-card {
+  max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.adjusters-panel {
+  max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - 16px);
+  overflow-y: auto;
+}
+
+.adjuster-list {
+  overscroll-behavior-x: contain;
+  scroll-padding: 4px;
+}
+
+.part-select > svg {
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .adjusters-panel {
+    top: max(1.5rem, env(safe-area-inset-top));
+    max-height: calc(100dvh - max(1.5rem, env(safe-area-inset-top)) - 84px);
+  }
+
+  .part-select > svg {
+    margin-inline: 0;
+  }
+}
+
+@media (max-height: 550px) and (max-width: 767px) {
+  .log-header {
+    max-height: 30dvh;
+    overflow-y: auto;
+    pointer-events: auto;
+    overscroll-behavior: contain;
+  }
+}
+
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;

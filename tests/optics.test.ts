@@ -84,15 +84,35 @@ describe("trace", () => {
     expect(result.solved).toBe(true);
   });
 
-  test("a closed loop of mirrors terminates", () => {
+  test("a closed mirror loop terminates after drawing one complete circuit", () => {
     const level = bench(["S.s.a", ".....", "..b.c"], {
       S,
-      s: { kind: "splitter", state: 3 },
+      s: { kind: "splitter", state: 1 },
       a: { kind: "mirror", state: 3 },
-      b: { kind: "mirror", state: 1 },
+      b: { kind: "mirror", state: 3 },
       c: { kind: "mirror", state: 1 },
     });
-    expect(trace(level, {}).segments.length).toBeLessThan(20);
+    const result = trace(level, {});
+    expect(result.segments).toHaveLength(6);
+    expect(result.segments.at(-1)).toMatchObject({ x0: 2, y0: 2, x1: 2, y1: 0 });
+    expect(result.marks).toEqual([{ x: 2, y: -0.5, kind: "lost", pieceId: undefined }]);
+    expect(result.solved).toBe(false);
+  });
+
+  test("a splitter's loop still lights its receiver exactly once", () => {
+    const level = bench(["..R..", "S.s.a", ".....", "..b.c"], {
+      S,
+      s: { kind: "splitter", state: 1 },
+      a: { kind: "mirror", state: 3 },
+      b: { kind: "mirror", state: 3 },
+      c: { kind: "mirror", state: 1 },
+      R: { kind: "receiver", state: 2 },
+    });
+    const result = trace(level, {});
+    expect(result.segments).toHaveLength(6);
+    expect(result.lit).toEqual(["receiver-2-0"]);
+    expect(result.marks.map((mark) => mark.kind)).toEqual(["lit"]);
+    expect(result.solved).toBe(true);
   });
 
   test("opposite directions", () => {

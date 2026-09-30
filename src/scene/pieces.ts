@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { Piece } from "../game/types";
 import { BEAM_Y, glowMaterial, PALETTE } from "./palette";
+import { shared } from "./resources";
 
 // Procedural instrument parts. Each piece's `pivot` turns about Y; state → angle lives here.
 
@@ -44,6 +45,8 @@ const G = {
   post: new THREE.CylinderGeometry(0.035, 0.045, 1, 12),
   pick: new THREE.CylinderGeometry(0.48, 0.48, 1, 16),
 };
+for (const material of Object.values(MAT)) shared(material);
+for (const geometry of Object.values(G)) shared(geometry);
 
 export interface PieceView {
   piece: Piece;
@@ -158,6 +161,17 @@ export function angleFor(piece: Piece, state: number): number {
     default:
       return 0;
   }
+}
+
+/** Mirrors, splitters and open tubes repeat after a half-turn. */
+export function rotationGoal(piece: Piece, current: number, state: number): number {
+  const period =
+    piece.kind === "mirror" || piece.kind === "splitter" || piece.kind === "aperture"
+      ? Math.PI
+      : Math.PI * 2;
+  const phase = ((angleFor(piece, state) - current) * Math.PI * 2) / period;
+  const delta = (Math.atan2(Math.sin(phase), Math.cos(phase)) * period) / (Math.PI * 2);
+  return current + delta;
 }
 
 export function buildPiece(piece: Piece): PieceView {
